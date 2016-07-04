@@ -27,10 +27,12 @@ var schema = new Schema({
     required: true
   },
   comments: {
-    type: Number
+    type: Number,
+    default: 0
   },
   articles: {
-    type: Number
+    type: Number,
+    default: 0
   }
 });
 

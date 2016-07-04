@@ -38,11 +38,16 @@ app.set('view engine', 'ejs'); // ejs render
 
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
-// Logger
+// Logger +  catch 404 and forward to error handler
 if (app.get('env') === 'development') {
   app.use(logger('dev'));
 } else {
   app.use(logger('default'));
+  app.use(function(req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+  });
 }
 
 
@@ -75,12 +80,8 @@ app.use('/users', users);
 
 
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
+
+
 // errorhandler
 app.use(function(err, req, res, next) {
   // NODE_ENV = 'development' || 'production'
