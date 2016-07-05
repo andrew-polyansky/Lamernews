@@ -62,6 +62,8 @@ app.use(session({
   store: new MongoStore({ mongooseConnection: mongoose.connection })
 }));
 
+app.use(require("./middleware/loadUser"));
+
 app.use(function(req, res, next) {
   req.session.numberOfVisits = req.session.numberOfVisits + 1 || 1;
   // res.send("Visits: " + req.session.numberOfVisits);
@@ -77,13 +79,6 @@ app.use(express.static(path.join(__dirname, 'public')));
  * Routes
  ********/
 app.use('/', routes);
-// app.route('/')
-//   .get(function(req, res, next) {
-//     res.render("index", {
-//
-//     });
-//
-//   });
 
 
 

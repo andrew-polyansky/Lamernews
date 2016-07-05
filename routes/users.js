@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var User = require('./../models/user.js').User;
 var HttpError = require('./../error').HttpError;
+var AuthError = require('./../models/user').AuthError;
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -19,7 +20,7 @@ router.get('/:username', function(req, res, next) { // :username => req.params.u
         return next(404);
       } else {
         res.json(user);
-        res.end("");
+        res.status(200).end();
       }
     })
     .catch(function(err){
@@ -34,47 +35,23 @@ router.post('/:username', function(req, res, next) {
   var password = req.body.password;
   var email = req.body.email;
 
-  User.findOne({username: username}).exec()
-    .then(function(user){
-      if (user) {
-        if (user.checkPassword(password)) { //... 200 OK
-          return user;
-        } else { //... 403 Forbidden
-          next(new HttpError(403, "Пароль неверен"));
-        }
-      } else {
-         user = new User({username: username, password: password, email: email});
-        return user.save()
-          .then(function(user){
-            return user;
-          }).catch(function(err){
-            console.log(err);
-            next(err);
-         });
-      }
-    })
-    .then(function(user) {
+  User.authorize(username, password, email, next)
+    .then(function(user) { //... 200 OK
       req.session.user = user._id;
-      res.send({}); // может быть объект с инфо о пользователе
+      res.status(200).send({}); // может быть объект с инфо о пользователе
     })
     .catch(function(err){
       console.log(err);
-      next(err);
+      if (err instanceof AuthError) {
+        return next(new HttpError(403, err.message));
+      } else {
+        next(err);
+      }
+
     });
 
 });
 
+
+
 module.exports = router;
-
-
-// , function(err, user){
-//   if(err) return next(err);
-//   if (!user) {
-//     var error = new Error('Not Found');
-//     error.status = 404;
-//     next(error);
-//   } else {
-//     res.json(user);
-//   }
-//
-// }
